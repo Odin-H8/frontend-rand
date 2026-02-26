@@ -32,7 +32,7 @@ module.exports = {
             allButtonsMode: false,
             isPlayerBoardCam: input.leg_players.some(player => player.player.board_stream_url),
             announcedStart: false,
-            keyboard:  {
+            keyboard: {
                 mode: 'full',
                 timer: undefined,
                 previous: { value: 0, multiplier: 1 }
@@ -41,7 +41,7 @@ module.exports = {
     },
 
     onMount() {
-        document.addEventListener("keydown",  _.debounce(function(e) {
+        document.addEventListener("keydown", _.debounce(function (e) {
             // Some Android tablets do a weird thing where they emit mulitple events, so debounce it here,
             // to ensure we only send a single one
             this.onKeyDown(e);
@@ -53,7 +53,7 @@ module.exports = {
         // If this is an official match, which has not had any darts thrown, and was not updated in the last two minutes
         // show the dialog to set player order
         const lastUpdated = (moment().valueOf() - moment.utc(this.input.leg.updated_at).valueOf()) / (1000 * 60);
-        if (this.input.match.tournament_id && this.input.leg.visits.length === 0 && !this.state.enableButtonInput &&lastUpdated > 2) {
+        if (this.input.match.tournament_id && this.input.leg.visits.length === 0 && !this.state.enableButtonInput && lastUpdated > 2) {
             document.getElementById('change-player-order').click();
         } else {
             if (this.input.leg.visits.length === 0) {
@@ -104,7 +104,7 @@ module.exports = {
                         axios.get(`${window.location.protocol}//${window.location.hostname}${this.input.locals.kcapp.api_path}/leg/${match.current_leg_id}/players`)
                     ]).then(axios.spread((legData, playersData) => {
                         const leg = legData.data;
-                        const players  = playersData.data;
+                        const players = playersData.data;
 
                         this.state.leg = leg;
                         this.state.players = players;
@@ -221,12 +221,12 @@ module.exports = {
         if (this.state.leg.visits.length > 0) {
             this.state.submitting = true;
             alertify.confirm('Delete last Visit',
-            () => {
-                this.state.socket.emit('undo_visit', {});
-            },
-            () => {
-                this.state.submitting = false;
-            });
+                () => {
+                    this.state.socket.emit('undo_visit', {});
+                },
+                () => {
+                    this.state.submitting = false;
+                });
         }
     },
 
@@ -277,7 +277,7 @@ module.exports = {
         var component = this.findActive(this.getComponents('players'));
         var thrown = component.getDartsThrown() - 1;
 
-        if (actualThrown < thrown ) {
+        if (actualThrown < thrown) {
             alertify.alert('Thrown cannot be less than actually thrown', () => { });
             return;
         }
@@ -325,14 +325,14 @@ module.exports = {
         const KEY_PAGE_DOWN = 34;
         const KEY_INSERT = 45;
         const KEY_DELETE = 46;
-        const simplified = [ KEY_END, KEY_ARROW_DOWN, KEY_PAGE_DOWN, KEY_INSERT, KEY_DELETE ];
+        const simplified = [KEY_END, KEY_ARROW_DOWN, KEY_PAGE_DOWN, KEY_INSERT, KEY_DELETE];
 
         const component = this.findActive(this.getComponents('players'));
         if (e.key === 'Backspace') {
             component.removeLast();
             e.preventDefault();
-        } else if (e.key === '$' || e.key === '=') { 
-            this.state.keyboard.mode = this.state.keyboard.mode === "simple" ? "full" :  "simple";
+        } else if (e.key === '$' || e.key === '=') {
+            this.state.keyboard.mode = this.state.keyboard.mode === "simple" ? "full" : "simple";
             this.setStateDirty('keyboard');
             this.state.enableButtonInput = false;
             e.preventDefault();
@@ -348,6 +348,7 @@ module.exports = {
                     this.state.socket.emit('throw', JSON.stringify(component.getPayload()));
                 }
             }).bind(this);
+
 
             let value = 0;
             let multiplier;
@@ -420,7 +421,9 @@ module.exports = {
                     clearInterval(this.state.keyboard.timer);
                     submit(component);
                 }, 350);
-                this.state.keyboard.previous = { value: value, multiplier: multiplier};
+                this.state.keyboard.previous = { value: value, multiplier: multiplier };
+            } else if (this.state.matchType === types.RANDOMIZER) {
+
             }
 
             if (!multiplier) {

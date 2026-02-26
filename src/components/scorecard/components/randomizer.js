@@ -17,14 +17,12 @@ exports.removeLast = function (dart, external) {
 exports.isBust = (player, dart, totalScore, leg) => {
     let currentScore = player.current_score - dart.getValue();
     if (player.player.options && !player.player.options.subtract_per_dart) {
-        // Figure out actual current score if we don't subract score per dart
         currentScore = currentScore - totalScore + dart.getValue();
     }
 
-    const outshotTypeId = leg.parameters.outshot_type.id;
+    const outshotTypeId = leg.parameters && leg.parameters.outshot_type ? leg.parameters.outshot_type.id : types.OUTSHOT_DOUBLE;
     if (outshotTypeId == types.OUTSHOT_ANY) {
         if (currentScore < 1) {
-            // We don't bust on 1 with single out
             return true;
         }
         return false;
@@ -33,9 +31,10 @@ exports.isBust = (player, dart, totalScore, leg) => {
 }
 
 exports.isMaxRound = (player, dartsThrown, leg, players, isBust) => {
+    const maxRounds = leg.parameters ? leg.parameters.max_rounds : null;
     if (player.player_id === players[players.length - 1].player_id &&
         (dartsThrown > 3 || isBust) &&
-        leg.parameters.max_rounds && leg.parameters.max_rounds === leg.round) {
+        maxRounds && maxRounds === leg.round) {
         return true;
     }
     return false;
@@ -44,10 +43,9 @@ exports.isMaxRound = (player, dartsThrown, leg, players, isBust) => {
 exports.isCheckout = (player, dart, totalScore, leg) => {
     let currentScore = player.current_score - dart.getValue();
     if (player.player.options && !player.player.options.subtract_per_dart) {
-        // Figure out actual current score if we don't subract score per dart
         currentScore = currentScore - totalScore + dart.getValue();
     }
-    const outshotTypeId = leg.parameters.outshot_type.id;
+    const outshotTypeId = leg.parameters && leg.parameters.outshot_type ? leg.parameters.outshot_type.id : types.OUTSHOT_DOUBLE;
     if (currentScore === 0 && (
         (outshotTypeId == types.OUTSHOT_ANY) ||
         (outshotTypeId == types.OUTSHOT_DOUBLE && dart.getMultiplier() === 2) ||
@@ -89,7 +87,6 @@ exports.confirmThrow = function (external) {
                     alertify.success('Player busted');
                     this.emit('player-busted', true);
 
-                    // Need to check for max round again here, since busting might have made us reach it
                     isMaxRound = module.exports.isMaxRound(this.state.player, this.state.currentDart, this.state.leg, this.input.players, true);
                     if (isMaxRound) {
                         alertify.notify(`Maximum numbers of rounds reached.`, 'warning');
@@ -114,7 +111,6 @@ exports.confirmThrow = function (external) {
         this.state.player.current_score -= scored;
     }
     if (!external) {
-        // If an external event triggered the update don't emit a throw
         this.emit('possible-throw', isCheckout, isBust, this.state.currentDart - 1, dart.getScore(), dart.getMultiplier(), false, false);
     }
     return submitting;

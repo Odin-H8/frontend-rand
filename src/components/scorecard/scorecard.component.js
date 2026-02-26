@@ -17,6 +17,7 @@ const jdcPractice = require('./components/jdc_practice');
 const knockout = require("./components/knockout");
 const scam = require("./components/scam");
 const oneseventy = require("./components/170");
+const randomizer = require("./components/randomizer")
 
 const types = require("./components/match_types");
 
@@ -217,6 +218,9 @@ module.exports = {
                 case types.ONESEVENTY:
                     submitting = oneseventy.confirmThrow.bind(this)(external);
                     break;
+                case types.RANDOMIZER:
+                    submitting = randomizer.confirmThrow.bind(this)(external);
+                    break;
             }
         }
         return submitting;
@@ -292,7 +296,7 @@ module.exports = {
                     confirmDialog.close();
                 }
             }, 1000);
-            confirmDialog.set('onclose', function() {
+            confirmDialog.set('onclose', function () {
                 clearInterval(countdownInterval);
             });
         }

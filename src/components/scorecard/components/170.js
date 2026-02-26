@@ -1,9 +1,9 @@
 const alertify = require("../../../util/alertify");
 
-exports.removeLast = function(dart, external) {
+exports.removeLast = function (dart, external) {
     const scored = dart.getValue();
 
-    if (dart.getMultiplier() == 2 && this.state.player.current_score === 0) { 
+    if (dart.getMultiplier() == 2 && this.state.player.current_score === 0) {
         this.state.player.current_points--;
     }
 
@@ -23,7 +23,7 @@ exports.isBust = (dart, player) => {
     if (currentScore < 0) {
         return true;
     }
-    
+
     if (dart.getMultiplier() == 2 && currentScore === 0) {
         // We checked out, so not a bust
         return false;
@@ -31,8 +31,8 @@ exports.isBust = (dart, player) => {
 
     if (player.darts_thrown === 7) {
         for (let i = 20; i > 0; i--) {
-            const possibleScore = currentScore - i*3;
-            if ((possibleScore === 50 || possibleScore <= 40) && possibleScore%2 === 0) {
+            const possibleScore = currentScore - i * 3;
+            if ((possibleScore === 50 || possibleScore <= 40) && possibleScore % 2 === 0) {
                 // There is a way to checkout with two darts, so it's not a bust
                 return false;
             }
@@ -40,7 +40,7 @@ exports.isBust = (dart, player) => {
         // We cannot checkout in 2 darts, to bust
         return true;
     } else if (player.darts_thrown === 8) {
-        if (currentScore > 50 || currentScore%2 !== 0 || (currentScore !== 50 && currentScore > 41)) {
+        if (currentScore > 50 || currentScore % 2 !== 0 || (currentScore !== 50 && currentScore > 41)) {
             // We can checkout in 1 dart
             return true;
         }
@@ -52,7 +52,7 @@ exports.isBust = (dart, player) => {
 }
 
 exports.isCheckout = (dart, player, leg) => {
-    if (dart.getMultiplier() == 2 && player.current_score === 0) { 
+    if (dart.getMultiplier() == 2 && player.current_score === 0) {
         player.current_points++;
     }
     return player.current_points >= leg.parameters.points_to_win;

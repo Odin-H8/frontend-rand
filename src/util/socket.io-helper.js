@@ -102,7 +102,7 @@ exports.say = (data, thiz) => {
     const oldPlayer = thiz.state.audioAnnouncer;
     const isAudioAnnouncement = (oldPlayer.duration > 0 && !oldPlayer.paused) || (!isNaN(oldPlayer.duration) && !oldPlayer.ended && oldPlayer.paused);
     if (data.audios) {
-        const audioPlayers = [ ];
+        const audioPlayers = [];
         for (const file of data.audios) {
             const audioPlayer = file.file ? new Audio(file.file) : speaker.getUtteranceWithVoice(file, voice);
             audioPlayer.volume = volume;
