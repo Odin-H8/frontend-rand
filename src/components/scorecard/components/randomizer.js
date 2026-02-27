@@ -118,7 +118,6 @@ exports.confirmThrow = function (external) {
         this.state.player.current_score -= playerNumbers[scored] * dart.getMultiplier();
     }
     if (!external) {
-        console.log('possible-throw', isCheckout, isBust, this.state.currentDart - 1, dart.getScore(), dart.getMultiplier(), false, false);
         this.emit('possible-throw', isCheckout, isBust, this.state.currentDart - 1, dart.getScore(), dart.getMultiplier(), false, false);
     }
     return submitting;
