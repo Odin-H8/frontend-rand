@@ -226,7 +226,8 @@ module.exports = {
                 },
                 () => {
                     this.state.submitting = false;
-                });
+                }
+            );
         }
     },
 
