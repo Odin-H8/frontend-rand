@@ -156,6 +156,9 @@ module.exports = {
                 case types.ONESEVENTY:
                     oneseventy.removeLast.bind(this)(dart, external);
                     break;
+                case types.RANDOMIZER:
+                    randomizer.removeLast.bind(this)(dart, external);
+                    break;
             }
             dart.reset();
         } else {

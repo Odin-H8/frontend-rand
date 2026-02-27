@@ -65,7 +65,7 @@ exports.confirmThrow = function (external) {
 
     const dart = this.getCurrentDart();
     let scored = dart.getScore();
-    if (scored / dart.getMultiplier() === 25) {
+    if (scored === 25) {
         scored = 21;
     }
 
@@ -115,7 +115,7 @@ exports.confirmThrow = function (external) {
     }
 
     if (!this.state.player.player.options || this.state.player.player.options.subtract_per_dart) {
-        this.state.player.current_score -= playerNumbers[scored];
+        this.state.player.current_score -= playerNumbers[scored] * dart.getMultiplier();
     }
     if (!external) {
         this.emit('possible-throw', isCheckout, isBust, this.state.currentDart - 1, dart.getScore(), dart.getMultiplier(), false, false);
