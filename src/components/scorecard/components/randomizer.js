@@ -1,3 +1,4 @@
+const { legs } = require("kcapp-sio-client/kcapp");
 const alertify = require("../../../util/alertify");
 const localStorage = require("../../../util/localstorage");
 const types = require("./match_types");
@@ -58,17 +59,23 @@ exports.isCheckout = (player, dart, totalScore, leg) => {
 exports.confirmThrow = function (external) {
     let submitting = false;
 
+    const playerNumbers = this.state.leg.parameters.random_x01_numbers
+        .find(entry => entry.player_id === this.state.player.player_id)
+        ?.numbers;
+
     const dart = this.getCurrentDart();
-    const scored = dart.getValue();
-    if (scored === 0) {
-        this.setDart(0, 1);
+    let scored = dart.getScore();
+    if (scored / dart.getMultiplier() === 25) {
+        scored = 21;
     }
+
+    dart.setDart(playerNumbers[scored], dart.getMultiplier());
     this.state.currentDart++;
     this.state.isSubmitted = true;
 
-    this.state.totalScore += scored;
+    this.state.totalScore += playerNumbers[scored] * dart.getMultiplier();
 
-    this.emit('score-change', scored, this.state.player.player_id);
+    this.emit('score-change', playerNumbers[scored] * dart.getMultiplier(), this.state.player.player_id);
 
     const isCheckout = module.exports.isCheckout(this.state.player, dart, this.state.totalScore, this.state.leg);
     const isBust = module.exports.isBust(this.state.player, dart, this.state.totalScore, this.state.leg);
@@ -108,7 +115,7 @@ exports.confirmThrow = function (external) {
     }
 
     if (!this.state.player.player.options || this.state.player.player.options.subtract_per_dart) {
-        this.state.player.current_score -= scored;
+        this.state.player.current_score -= playerNumbers[scored];
     }
     if (!external) {
         this.emit('possible-throw', isCheckout, isBust, this.state.currentDart - 1, dart.getScore(), dart.getMultiplier(), false, false);
