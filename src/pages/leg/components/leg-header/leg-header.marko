@@ -10,6 +10,9 @@
   <if(input.leg.parameters && input.leg.parameters.outshot_type)>
     <div class="float-left font-24">/${input.leg.parameters.outshot_type.short_name}</div>
   </if>
+  <if(input.match.seed)>
+    <div class="float-left font-24">${`/Seed: ${input.match.seed}`}</div>
+  </if>
   <if(state.keyboardMode === 'simple')>
     <div class="float-left font-24 pl-10"><i class="fas fa-keyboard"></i></div>
   </if>
