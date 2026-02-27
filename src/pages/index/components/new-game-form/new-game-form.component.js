@@ -399,15 +399,6 @@ module.exports = {
 			}
 		}
 
-		seed = null;
-		if (this.state.options.game_type === types.RANDOMIZER) {
-			if (this.state.options.seed) {
-				seed = this.state.options.seed;
-			} else {
-				seed = "123";
-			}
-		}
-
 		const body = {
 			starting_score: this.state.options.starting_score,
 			match_type: this.state.options.game_type,
@@ -421,8 +412,15 @@ module.exports = {
 			players: this.state.selected.map(player => player.id),
 			office_id: officeId,
 			player_handicaps: handicaps,
-			seed: seed
 		}
+		if (this.state.options.game_type === types.RANDOMIZER) {
+			if (this.state.options.seed) {
+				body.seed = this.state.options.seed;
+			} else {
+				body.seed = null;
+			}
+		}
+
 		axios.post(`${window.location.origin}/matches/new`, body)
 			.then(response => {
 				// Store venue in localstorage so it doesn't have to be selected each time

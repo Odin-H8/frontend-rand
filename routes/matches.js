@@ -260,52 +260,68 @@ router.post('/new', function (req, res, next) {
                 const player = playerMap[players[i]];
                 isPractice = player.is_bot;
             }
-            const body = {
-                owe_type_id: req.body.match_stake == -1 ? null : req.body.match_stake,
-                venue_id: req.body.venue === -1 ? null : req.body.venue,
-                match_type: { id: req.body.match_type },
-                match_mode: { id: req.body.match_mode },
-                players: players.map(Number),
-                player_handicaps: req.body.player_handicaps,
-                bot_player_config: req.body.bot_player_config,
-                legs: [{
-                    starting_score: req.body.starting_score,
-                    parameters: {
-                        outshot_type: { id: req.body.outshot_type },
-                        starting_lives: req.body.starting_lives,
-                        points_to_win: req.body.points_to_win,
-                        max_rounds: req.body.max_rounds === -1 ? null : req.body.max_rounds
-                    }
-                }],
-                office_id: req.body.office_id,
-                is_practice: isPractice,
-                seed: req.body.seed
-            }
 
-            axios.post(`${req.app.locals.kcapp.api}/match`, body)
-                .then(response => {
-                    const match = response.data;
-                    this.socketHandler.setupLegsNamespace(match.current_leg_id);
+            const seedPromise = req.body.seed === null
+                ? axios.get("http://10.12.141.112:5000/pipeline/0/stages/1/frame")
+                    .then(response => {
+                        req.body.seed = require('crypto').createHash('sha256')
+                            .update(JSON.stringify(response.data))
+                            .digest('hex');
+                        console.log("seed:" + req.body.seed);
+                    })
+                    .catch(error => {
+                        debug(`Error when getting seed from dart vision pipeline ${error}`);
+                    })
+                : Promise.resolve();
 
-                    // Forward all spectating clients to next leg
-                    if (match.venue) {
-                        this.socketHandler.emitMessage(`/venue/${match.venue.id}`, 'venue_new_match', {
-                            match: match,
-                            leg_id: match.current_leg_id
-                        });
-                        this.socketHandler.emitMessage('/active', 'new_match', {
-                            match: match
-                        });
-                    }
-                    res.status(200).send(match).end();
-                }).catch(error => {
+            seedPromise.then(() => {
+                const body = {
+                    owe_type_id: req.body.match_stake == -1 ? null : req.body.match_stake,
+                    venue_id: req.body.venue === -1 ? null : req.body.venue,
+                    match_type: {id: req.body.match_type},
+                    match_mode: {id: req.body.match_mode},
+                    players: players.map(Number),
+                    player_handicaps: req.body.player_handicaps,
+                    bot_player_config: req.body.bot_player_config,
+                    legs: [{
+                        starting_score: req.body.starting_score,
+                        parameters: {
+                            outshot_type: {id: req.body.outshot_type},
+                            starting_lives: req.body.starting_lives,
+                            points_to_win: req.body.points_to_win,
+                            max_rounds: req.body.max_rounds === -1 ? null : req.body.max_rounds
+                        }
+                    }],
+                    office_id: req.body.office_id,
+                    is_practice: isPractice,
+                    seed: req.body.seed
+                };
+
+                axios.post(`${req.app.locals.kcapp.api}/match`, body)
+                    .then(response => {
+                        const match = response.data;
+                        this.socketHandler.setupLegsNamespace(match.current_leg_id);
+
+                        // Forward all spectating clients to next leg
+                        if (match.venue) {
+                            this.socketHandler.emitMessage(`/venue/${match.venue.id}`, 'venue_new_match', {
+                                match: match,
+                                leg_id: match.current_leg_id
+                            });
+                            this.socketHandler.emitMessage('/active', 'new_match', {
+                                match: match
+                            });
+                        }
+                        res.status(200).send(match).end();
+                    }).catch(error => {
                     if (error.response.status === 400) {
-                        res.status(400).send({ status: 400, message: error.response.data }).end();
+                        res.status(400).send({status: 400, message: error.response.data}).end();
                     } else {
                         debug(`Error when starting new match: ${error}`);
                         next(error);
                     }
                 });
+            });
         }).catch(error => {
             debug(`Error when starting new match: ${error}`);
             next(error);
